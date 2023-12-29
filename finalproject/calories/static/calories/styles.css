@@ -1,0 +1,56 @@
+body{
+    padding:2px;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+.navbar-nav{
+    padding-left:5px;
+}
+.navbar-brand{
+    padding-left:10px;
+}
+@media (min-width: 541px){
+    .card{
+        width:50%;
+    }
+}
+
+.footer{
+    margin-top: auto;
+}
+.username{
+    margin-right: auto !important;
+}
+
+.hero {
+    height: 50vh;
+    background-size: cover;  
+    background-position: center;
+    color: #007bff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size:50px;
+    background-attachment: fixed;
+}
+
+input[type="text"], input[type="email"], textarea {
+    width: 100%; /* Make input fields take up the full width of their container */
+}
+
+@media (max-width: 540px) {
+    input[type="text"], input[type="email"], textarea {
+        width: 50%; /* Make input fields take up half of their container's width on larger screens */
+    }
+    .card{
+        width:100%;
+    }
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .table-container table {
+        width: 200%; /* Make the table twice as wide as its container */
+    }
+}

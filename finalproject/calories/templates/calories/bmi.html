@@ -1,0 +1,98 @@
+{% extends "calories/layout.html"%}
+{% load static %}
+{%block body%}
+<div class="d-flex justify-content-center align-items-center" style="padding-top:20px;"> <h3>BMI calculator</h3> </div>
+<script type="text/javascript">
+    function getBMI(){
+        document.querySelector('.btn.btn-primary').onclick = ()=>{
+            weight = document.querySelector('#weight').value;
+            height = document.querySelector('#height').value;
+            age = document.querySelector('#age').value;
+            fetch(`/bmi_get?weight=${weight}&height=${height}&age=${age}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                console.log(data.data);
+                console.log(data.data.bmi)
+                html = `<div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">BMI: ${data.data.bmi}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">BMI Category: ${data.data.health}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Ideal BMI: ${data.data.healthy_bmi_range}</h6>
+                    </div>
+                </div>`; 
+
+                document.querySelector('.result').innerHTML = html;
+            })
+        }
+    }
+
+    function checkcorrect(){
+        
+        
+        document.querySelector('#weight').onkeyup = ()=>{
+            weight = document.querySelector('#weight').value;
+            height = document.querySelector('#height').value;
+            if(weight<40 || weight>160){
+                document.querySelector('#weight-warn').classList.remove('d-none');
+                document.querySelector('.btn.btn-primary').disabled = true;
+            }
+            else{
+                document.querySelector('#weight-warn').classList.add('d-none');
+            }
+
+            if(height>=130 && height<=230 && weight>=40 && weight<=160){
+                document.querySelector('.btn.btn-primary').disabled = false;
+            }
+            else{
+                document.querySelector('.btn.btn-primary').disabled = true;
+            }
+        }
+        document.querySelector('#height').onkeyup = ()=>{
+            weight = document.querySelector('#weight').value;
+            height = document.querySelector('#height').value;
+            if(height<130 || height>230){
+                document.querySelector('#height-warn').classList.remove('d-none');
+                document.querySelector('.btn.btn-primary').disabled = true;
+            }
+            else{
+                document.querySelector('#height-warn').classList.add('d-none');
+            }
+
+            if(height>=130 && height<=230 && weight>=40 && weight<=160){
+                document.querySelector('.btn.btn-primary').disabled = false;
+            }
+            else{
+                document.querySelector('.btn.btn-primary').disabled = true;
+            }
+        }
+
+        
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+        document.querySelector('.btn.btn-primary').disabled = true;
+        checkcorrect();
+        getBMI();
+    })
+</script>
+<div class="BMI d-flex justify-content-center align-items-center">
+<div class="card ">
+<div class="card-body">
+    <label for="weight">Weight</label>
+    <input type="number" id="weight" placeholder="Weight in kg" class="form-control">
+    <div id="weight-warn" class="text-danger d-none">Weight should be between 40 and 160 kg</div>
+    <label for="height">Height</label>
+    <input type="number" id="height" placeholder="Height in cm" class="form-control">
+    <div id="height-warn" class="text-danger d-none">Weight should be between 130 and 230 cm</div>
+    <label for="age">Age</label>
+    <input type="number" id="age" placeholder="Age in years" class="form-control">
+    <button class="btn btn-primary" id="calculate">Calculate</button>
+</div>
+</div>
+</div>
+<div class="result d-flex justify-content-center align-items-center">
+   
+</div>  
+
+{% endblock %}

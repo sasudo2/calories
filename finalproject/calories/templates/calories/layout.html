@@ -1,0 +1,66 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calories</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="{% static 'calories/styles.css' %}" rel="stylesheet">
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+      <a class="navbar-brand" href="{% url 'index' %}">Calories</a>
+    
+      <div>
+        <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Services
+              </a>
+              <ul class="dropdown-menu">
+                {% if user.is_authenticated %}
+                  <li><a class="dropdown-item" href="{% url 'today' %}">Today's Nutrients</a></li>
+                  <li><a class="dropdown-item" href="{% url 'records' %}">Daily Nutrients History</a></li>
+                {% else %}
+                <li><a class="dropdown-item" href="{% url 'login' %}">login to Count Today's Nutrients</a></li>
+                  <li><a class="dropdown-item" href="{% url 'login' %}">login to See Record of Daily Nutrients</a></li>
+                {% endif %}
+              </ul>
+            </li>
+          {% if user.is_authenticated %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+              </li>
+          {% else %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'login' %}">Log In</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'register' %}">Register</a>
+              </li>
+          {% endif %}
+          {% if user.is_authenticated %}
+              <li class="nav-item ml-auto">
+                  <a class="nav-link" href="#"><strong>{{ user.username }}</strong></a>
+              </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+    <div class="body">
+      {% block body %}
+      {% endblock %}
+    </div>
+    <div class="footer">
+      <footer class="py-3 my-4">
+        <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+          <li class="nav-item"><a href="{% url 'index' %}" class="nav-link px-2 text-muted">Home</a></li>
+        </ul>
+        <p class="text-center text-muted">CS50 web, 2023</p>
+      </footer>
+    </div>
+  </body>
+</html>
+

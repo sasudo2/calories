@@ -1,0 +1,81 @@
+{% extends "calories/layout.html"%}
+{% load static %}
+{%block body%}
+<div class="d-flex justify-content-center align-items-center" style="padding-top:20px;">
+    <h3>Nutrient Records</h3>
+</div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<script type="text/javascript">
+    calories = JSON.parse('{{calories_json | escapejs}}').map((value) => parseFloat(value).toFixed(2));
+    protein = JSON.parse('{{protein_json | escapejs}}').map((value) => parseFloat(value).toFixed(2));
+    carbs = JSON.parse('{{carbohydrates_json | escapejs}}').map((value) => parseFloat(value).toFixed(2));
+    sugar = JSON.parse('{{sugar_json | escapejs}}').map((value) => parseFloat(value).toFixed(2));
+    fat = JSON.parse('{{fat_json | escapejs}}').map((value) => parseFloat(value).toFixed(2));
+    fiber = JSON.parse('{{fiber_json | escapejs}}').map((value) => parseFloat(value).toFixed(2));
+    dates = JSON.parse('{{dates_json | escapejs}}');
+    console.log(calories)
+    console.log(protein)
+    document.addEventListener("DOMContentLoaded", ()=>{
+        {% comment %} let data = JSON.parse('{{ dict | escapejs }}'); {% endcomment %}
+        const xValues = dates;
+
+        new Chart("myChart", {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: [{
+            data: carbs,
+            borderColor: "red",
+            fill: false,
+            label: 'carbs(grams)'
+            },{
+            data: calories,
+            borderColor: "green",
+            fill: false,
+            label: 'calories(cal)'
+            },{
+            data: protein,
+            borderColor: "blue",
+            fill: false,
+            label: 'protein(grams)'
+            }]
+        },
+        options: {
+            legend: {display: true},
+        }
+        });
+
+        new Chart("myChart2", {
+        type: "line",
+        data: {
+            labels: xValues,
+            datasets: [{
+                data: sugar,
+                borderColor: "red",
+                fill: false,
+                label: 'sugar(grams)'
+            },{
+                data: fat,
+                borderColor: "green",
+                fill: false,
+                label: 'fat(grams)'
+            },{
+                data: fiber,
+                borderColor: "blue",
+                fill: false,
+                label: 'fiber(grams)'
+            }]
+        },
+        options: {
+            legend: {display: true},
+        }
+        });
+    })
+</script>
+<div class="d-flex justify-content-center align-items-center" style="padding-top:20px;">
+<canvas class="food_calculated d-flex justify-content-center align-items-center" id="myChart" style="width:100%;max-width:700px"></canvas>
+</div>
+<div class="d-flex justify-content-center align-items-center" style="padding-top:20px;">
+    <canvas class="food_calculated d-flex justify-content-center align-items-center" id="myChart2" style="width:100%;max-width:700px"></canvas>
+</div>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "calories/layout.html"%}
+{% load static %}
+{%block body%}
+<div class="d-flex justify-content-center align-items-center" style="padding-top:20px;">
+<h3>Calculate Today's Nutrients Consumption</h3>
+</div>
+
+<script type='text/javascript'>
+    let list = {};
+    let food_id = 0;
+    document.addEventListener('DOMContentLoaded', ()=>{
+        document.querySelector('.btn.btn-primary.add').disabled = true;
+        document.querySelector('.form-control.food').oninput = ()=>{
+            if(document.querySelector('.form-control.food').value.length > 0){
+                document.querySelector('.btn.btn-primary.add').disabled = false;
+            }
+            else{
+                document.querySelector('.btn.btn-primary.add').disabled = true;
+            }
+        }
+        document.querySelector('.btn.btn-primary.add').onclick = ()=>{
+            if(document.querySelector('.form-control.food').value.length > 0){
+                let l = document.createElement('tr');
+                if(document.querySelector('.form-control.amount').value === ""){
+                    document.querySelector('.form-control.amount').value = 100;
+                }
+                html = `
+                <td>${document.querySelector('.form-control.food').value}</td>
+                <td>${document.querySelector('.form-control.amount').value}gm</td>
+                <td><button class="btn btn-danger" id="${food_id}">Delete</button></td>`
+
+                l.innerHTML = html;
+                document.querySelector('.container').append(l);
+                document.querySelector('.food_list').classList.remove('d-none');
+                document.querySelector('.btn.btn-primary.add').disabled = true;
+                list[food_id] = (`${document.querySelector('.form-control.food').value}` + ` ${document.querySelector('.form-control.amount').value}g, `);
+                document.querySelector('.form-control.food').value = '';
+                document.querySelector('.form-control.amount').value = '';
+                food_id++;
+            }
+            }
+             
+            let t_quantity = 0;
+            let t_calories = 0;
+            let t_protein = 0;
+            let t_carbs = 0;
+            let t_cholesterol = 0;
+            let t_fat_saturated = 0;
+            let t_fat = 0;
+            let t_fiber = 0;
+            let t_sugar = 0;
+            let t_sodium = 0;
+            let t_potassium = 0;
+                
+
+        document.querySelector('.btn.btn-primary.calculate').onclick = ()=>{
+            let foods = Object.values(list);
+            let string = foods.join('');
+           
+            console.log(string);
+            fetch(`/search?q=${string}`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                let count = Object.keys(data.items).length;
+                console.log(data);
+                console.log(count);
+                document.querySelector('.calculated_container').innerHTML = '';
+                for(let i = 0; i<count; i++){
+                    console.log(i);
+                    
+                    t_quantity += data.items[i].serving_size_g;
+                    t_calories += data.items[i].calories;
+                    t_protein += data.items[i].protein_g;
+                    t_carbs += data.items[i].carbohydrates_total_g;
+                    t_cholesterol += data.items[i].cholesterol_mg;
+                    t_fat_saturated += data.items[i].fat_saturated_g;
+                    t_fat += data.items[i].fat_total_g;
+                    t_fiber += data.items[i].fiber_g;
+                    t_sugar += data.items[i].sugar_g;
+                    t_sodium += data.items[i].sodium_mg;
+                    t_potassium += data.items[i].potassium_mg;
+                    let l = document.createElement('tr');
+                    html = `<td>${data.items[i].name}</td>
+                    <td>${data.items[i].serving_size_g}gm</td>
+                    <td>${data.items[i].calories}cal</td>
+                    <td>${data.items[i].protein_g}gm</td>
+                    <td>${data.items[i].carbohydrates_total_g}gm</td>
+                    <td>${data.items[i].cholesterol_mg}mg</td>
+                    <td>${data.items[i].fat_saturated_g}gm</td>
+                    <td>${data.items[i].fat_total_g}gm</td>
+                    <td>${data.items[i].fiber_g}gm</td>
+                    <td>${data.items[i].sugar_g}gm</td>
+                    <td>${data.items[i].sodium_mg}mg</td>
+                    <td>${data.items[i].potassium_mg}mg</td>`
+                    l.innerHTML = html;
+                    document.querySelector('.calculated_container').append(l);
+                }
+
+                let l = document.createElement('tr');
+                html = `<td><strong>Total</strong></td>
+                <td>${t_quantity.toFixed(2)}gm</td>
+                <td>${t_calories.toFixed(2)}cal</td>
+                <td>${t_protein.toFixed(2)}gm</td>
+                <td>${t_carbs.toFixed(2)}gm</td>
+                <td>${t_cholesterol.toFixed(2)}mg</td>
+                <td>${t_fat_saturated.toFixed(2)}gm</td>
+                <td>${t_fat.toFixed(2)}gm</td>
+                <td>${t_fiber.toFixed(2)}gm</td>
+                <td>${t_sugar.toFixed(2)}gm</td>
+                <td>${t_sodium.toFixed(2)}mg</td>
+                <td>${t_potassium.toFixed(2)}mg</td>`
+                l.innerHTML = html;
+                document.querySelector('.calculated_container').append(l);
+                document.querySelector('.food_calculated').classList.remove('d-none');
+                   
+            })
+            
+        }
+
+        document.querySelector('.btn.btn-primary.save').onclick = ()=>{
+            document.querySelector('.food_calculated').classList.add('d-none');
+            fetch(`/save?t_quantity=${t_quantity}&t_calories=${t_calories}&t_protein=${t_protein}&t_carbs=${t_carbs}&t_cholesterol=${t_cholesterol}&t_fat_saturated=${t_fat_saturated}&t_fat=${t_fat}&t_fiber=${t_fiber}&t_sugar=${t_sugar}&t_sodium=${t_sodium}&t_potassium=${t_potassium}`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if(data.response === 'true'){
+                    document.querySelector(".card.alert").innerHTML = `<div class="alert alert-primary" role="alert">
+                        Data Saved Successfully
+                      </div>`
+                }
+                else{
+                    document.querySelector(".card.alert").innerHTML = `<div class="alert alert-danger" role="alert">
+                        Data Not Saved
+                      </div>`
+                }
+            })
+        }
+            
+        })
+
+    document.addEventListener('click', (event)=>{
+        if(event.target.className === 'btn btn-danger'){
+            let id = event.target.id;
+            document.getElementById(id).parentElement.parentElement.remove();
+            delete list[id];
+            if(Object.keys(list).length === 0){
+                document.querySelector('.food_list').classList.add('d-none');
+            }
+            else{
+                document.querySelector('.food_list').classList.remove('d-none');
+            }
+        }
+    })
+</script>
+
+<div class="food d-flex justify-content-center align-items-center" style="width:100%;">
+    <div class="card" style="border:none;">
+        <div class="card-body">
+            <div class="input-group">
+                <input class="form-control food" type="text" placeholder="Enter Food" aria-label="default input example" autofocus></input>
+                <input class="form-control amount" type="number" placeholder="Enter amount in gm" aria-label="default input example"></input>
+                <div class="input-group-append">
+                    <button class="btn btn-primary add" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                        Add Food
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="food_list d-flex justify-content-center align-items-center d-none">
+    <div class="card" style="width: 25rem;">
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Food</th>
+                <th scope="col">Quantity</th>
+                <th scopr="col"></th>
+              </tr>
+            </thead>
+            <tbody class="container">
+            </tbody>
+        </table>
+        <div>
+            <button class="btn btn-primary calculate" id="calculate">Calculate</button>
+        </div>
+    </div>
+</div>
+<div class="food_calculated d-flex justify-content-center align-items-center d-none">
+    <div class="card table-container" style="width: 70rem;">
+        <table class="calculated_table">
+            <thead>
+                <tr>
+                    <th scope="col">Food</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Calories</th>
+                    <th scope="col">Protein</th>
+                    <th scope="col">Carbs</th>
+                    <th scope="col">Cholesterol</th>
+                    <th scope="col">Fat Saturated</th>
+                    <th scope="col">Fat Total</th>
+                    <th scope="col">Fiber</th>
+                    <th scope="col">Sugar</th>
+                    <th scope="col">Sodium</th>
+                    <th scope="col">Potassium</th>
+                </tr>
+            </thead>
+            <tbody class="calculated_container">
+            </tbody>
+        </table>
+         <div>
+            <button class="btn btn-primary save" id="calculate">Save</button>
+        </div>
+    </div>
+</div>
+<div class="alert">
+    <div class="card alert" style="width: 25rem; border:none;">
+    </div>
+</div>
+{% endblock %}

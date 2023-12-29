@@ -1,0 +1,236 @@
+
+{% extends "calories/layout.html"%}
+{% load static %}
+{%block body%}
+<div class="hero"  style="background-image: url({% static 'images/index_img.jpg' %});">
+{% if user.is_authenticated %}
+<div><strong> Welcome {{user.username}}! </strong></div>
+{%else%}
+<div><strong> Welcome Guest! </strong></div>
+{%endif%}
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>What is Calorie Counter?</h2>
+            <p>Calorie Counter is a web application that allows you to track your daily calorie intake. It also allows you to set a goal for yourself and track your progress towards that goal. </p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+// checks if the search bar is empty or not
+    function check(){
+        document.querySelector('input').oninput = ()=>{
+            if(document.querySelector('input').value.length > 0){
+                document.querySelector('button').disabled = false;
+            }
+            else{
+                document.querySelector('button').disabled = true;
+            }
+        }
+        document.addEventListener('click', event =>{
+            const element = event.target;
+            if(element.className === 'btn btn-primary'){
+                search();
+            }
+        })
+    }
+// fetches the data from the api and displays it
+    function search(){
+        div = document.querySelector('.result');
+        div.innerHTML = '';
+        console.log(document.querySelector('#search_bar').value);
+        fetch(`/search?q=${document.querySelector('#search_bar').value}`,{
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            list = data.items[0];
+            
+            if(list && list.name){
+                name = list.name.charAt(0).toUpperCase() + list.name.slice(1);
+                div.innerHTML = `<div class="card" style="width: 25rem;">
+                    <div style="padding: 5px;">
+                    <div><strong>${name}</strong></div>
+                    <div>Quantity: ${list.serving_size_g}gm</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nutrients</th>
+                            <th scope="col">Quantity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <th scope="row">1</th>
+                            <td>Carbohydrates</td>
+                            <td>${list.carbohydrates_total_g}g</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">2</th>
+                            <td>Calories</td>
+                            <td>${list.calories}kcal</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">3</th>
+                            <td>Cholesterol</td>
+                            <td>${list.cholesterol_mg}mg</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">4</th>
+                            <td>Saturated Fat</td>
+                            <td>${list.fat_saturated_g}g</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">5</th>
+                            <td>Total Fat</td>
+                            <td>${list.fat_total_g}g</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">6</th>
+                            <td>Fiber</td>
+                            <td>${list.fiber_g}g</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">7</th>
+                            <td>Potassium</td>
+                            <td>${list.potassium_mg}mg</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">8</th>
+                            <td>Protein</td>
+                            <td>${list.protein_g}g</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">9</th>
+                            <td>sodium</td>
+                            <td>${list.sodium_mg}mg</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">10</th>
+                            <td>Sugar</td>
+                            <td>${list.sugar_g}g</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      </div>`
+            }
+            else{
+                div.innerHTML = `<div class="card" style="width: 20rem; border:none;">
+                    <small>Sorry, we couldn't find what you were looking for.</small>
+                    </div>`;
+            }
+            
+
+        })
+    }
+// checks if the set form is empty or not  
+    function set(){
+          age = document.querySelector('.form-control.age');
+          height = document.querySelector('.form-control.height');
+          weight = document.querySelector('.form-control.weight');
+          sex = document.querySelector('.form-select.sex');
+          if(age.value === "" || height.value === "" || weight === "" || sex === ""){
+            document.querySelector('.btn.btn-primary.set').disabled = true;
+          }
+          else{
+            document.querySelector('.btn.btn-primary.set').disabled = false;
+          }
+    }
+
+    document.addEventListener("input", function(){
+        set();
+    });
+
+ // runs check and set function once DOM is loaded   
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelector('button').disabled = true;
+        check();
+        "{% if user.set == False%}"
+        set();
+        "{% endif %}"
+        document.querySelector(".btn.btn-primary.recomment").onclick = ()=>{
+          fetch(`/recomendations`,{
+              method: 'GET'
+          })
+          .then(response => response.json())
+          .then(data => {
+              response = JSON.parse(data).map((value) => parseFloat(value).toFixed(2));
+              console.log(response);
+              data
+              document.querySelector('.recomendation').innerHTML = `
+                      <div style="padding: 5px;">
+                      <div><strong>Daily Recomendation</strong></div>
+                      <div>Calories: ${response[0]}kcal</div>
+                      <div>Potassium: ${response[1]}-${response[2]}mg</div>
+                      <div>Fat: ${response[3]}g</div>
+                      </div>`
+          })
+      }
+         
+    })
+
+</script>
+
+{% comment %} displays search bar {% endcomment %}
+<div class="search d-flex justify-content-center align-items-center">
+    <div class="card" style="border:none;">
+        <div class="card-body">
+            <div class="input-group">
+                <input class="form-control search_bar" id='search_bar' type="text" placeholder="Search for food...">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </div>
+      </div>    
+</div>
+{% comment %} displays result of search {% endcomment %}
+<div class="result d-flex justify-content-center align-items-center">
+</div>
+
+{% comment %} displays user's information and recomendation {% endcomment %}
+{% if user.is_authenticated %}
+<div class="container">
+  <div class="card">
+  {% if user.set == False%}
+    <div class="card-body notset">
+      <form action="{% url 'set' %}" method="POST" class="set">
+        {% csrf_token %}
+        <h5 class="card-title">Set your profile</h5>
+        <input class="form-control age" type="number" name="age" placeholder="age">
+        <input class="form-control height" type="number" name="height" placeholder="height in cm">
+        <input class="form-control weight" type="number" name="weight" placeholder="weight in kg">
+        <select class="form-select sex" name="sex" placeholder="sex">
+          <option value="M">M</option>
+          <option value="F">F</option>
+        </select>
+        <button type="submit" class="btn btn-primary set">Set</button>
+      </form>
+    </div>
+    </div>
+    {% else %}
+      <div class="card-body set">
+        <h5>Profile</h5>
+        <div>
+          <div>
+          <h6>Age: {{user.age}}years</h6>
+          </div>
+          <div>
+          <h6>Height: {{user.height}}cm</h6>
+          </div>
+          <div>
+          <h6>Weight: {{user.weight}}kg</h6>
+          </div>
+          <div class="recomendation">
+            <button class="btn btn-primary recomment">Recomend me</button>
+          </div>
+      </div>
+    {% endif %}
+    {% endif %}
+
+</div>
+{% endblock%}
